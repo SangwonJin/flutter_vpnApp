@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:openvpn_test_app/allControllers/home_controller.dart';
+import 'package:openvpn_test_app/allModels/vpn_status.dart';
 import 'package:openvpn_test_app/allWidgets/custom_widget.dart';
 import 'package:openvpn_test_app/appPreferences/appPreferences.dart';
+import 'package:openvpn_test_app/vpnEngine/vpn_engine.dart';
 
 import '../main.dart';
 
@@ -58,23 +60,24 @@ class HomeScreen extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(100),
             child: Container(
-              padding: const EdgeInsets.all(18),
-              decoration: const BoxDecoration(
+              padding: EdgeInsets.all(18),
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.green,
+                color: homeController.getRoundVpnButtonColor.withOpacity(0.1),
               ),
               child: Container(
-                padding: const EdgeInsets.all(18),
-                decoration: const BoxDecoration(
+                padding: EdgeInsets.all(18),
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  // color: Colors.pink,
+                  color: homeController.getRoundVpnButtonColor.withOpacity(0.3),
                 ),
                 child: Container(
                   width: sizeScreen.width * 0.14,
                   height: sizeScreen.height * 0.14,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    // color: Colors.white,
+                    color:
+                        homeController.getRoundVpnButtonColor.withOpacity(0.5),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -82,13 +85,13 @@ class HomeScreen extends StatelessWidget {
                       Icon(
                         Icons.power_settings_new,
                         size: 30,
-                        // color: Colors.white,
+                        color: Colors.white,
                       ),
                       const SizedBox(
                         height: 6,
                       ),
                       Text(
-                        "Tap to connect",
+                        homeController.getRoundVpnButtonText,
                         style: TextStyle(
                             fontSize: 14,
                             color: Colors.white,
@@ -134,84 +137,92 @@ class HomeScreen extends StatelessWidget {
         children: [
           //2 round widget
           //location + ping
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomWidget(
-                titleText: homeController.vpnInfo.value.contryLongName.isEmpty
-                    ? "Location"
-                    : homeController.vpnInfo.value.contryLongName,
-                subTitleText: "FREE",
-                roundWidgetWithIcon: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.redAccent,
-                  child: homeController.vpnInfo.value.contryLongName.isEmpty
-                      ? Icon(
-                          Icons.flag_circle,
-                          size: 30,
-                          color: Colors.white,
-                        )
-                      : null,
-                  backgroundImage: homeController
-                          .vpnInfo.value.contryLongName.isEmpty
-                      ? null
-                      : AssetImage(
-                          "countryFlags/${homeController.vpnInfo.value.countryShortName.toLowerCase()}"),
-                ),
-              ),
-              CustomWidget(
-                titleText: homeController.vpnInfo.value.contryLongName.isEmpty
-                    ? "60ms"
-                    : "${homeController.vpnInfo.value.ping} ms",
-                subTitleText: "Ping",
-                roundWidgetWithIcon: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.black54,
-                  child: Icon(
-                    Icons.flag_circle,
-                    size: 30,
-                    color: Colors.white,
+          Obx(
+            () => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CustomWidget(
+                  titleText: homeController.vpnInfo.value.contryLongName.isEmpty
+                      ? "Location"
+                      : homeController.vpnInfo.value.contryLongName,
+                  subTitleText: "FREE",
+                  roundWidgetWithIcon: CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.redAccent,
+                    child: homeController.vpnInfo.value.contryLongName.isEmpty
+                        ? Icon(
+                            Icons.flag_circle,
+                            size: 30,
+                            color: Colors.white,
+                          )
+                        : null,
+                    backgroundImage: homeController
+                            .vpnInfo.value.contryLongName.isEmpty
+                        ? null
+                        : AssetImage(
+                            "countryFlags/${homeController.vpnInfo.value.countryShortName.toLowerCase()}.png"),
                   ),
                 ),
-              ),
-            ],
+                CustomWidget(
+                  titleText: homeController.vpnInfo.value.contryLongName.isEmpty
+                      ? "60ms"
+                      : "${homeController.vpnInfo.value.ping} ms",
+                  subTitleText: "Ping",
+                  roundWidgetWithIcon: CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.black54,
+                    child: Icon(
+                      Icons.flag_circle,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
           //button for vpn
           vpnRoundButton(),
 
           //2 round widget
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomWidget(
-                titleText: "0 kbps",
-                subTitleText: "DOWNLOAD",
-                roundWidgetWithIcon: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.greenAccent,
-                  child: Icon(
-                    Icons.arrow_circle_down,
-                    size: 30,
-                    color: Colors.white,
+          StreamBuilder<VpnStatus?>(
+            initialData: VpnStatus(),
+            stream: VpnEngine.snapshotVpnStatus(),
+            builder: (context, dataSnapshot) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomWidget(
+                    titleText: "${dataSnapshot.data?.byteIn ?? '0 kbps'}",
+                    subTitleText: "DOWNLOAD",
+                    roundWidgetWithIcon: CircleAvatar(
+                      radius: 32,
+                      backgroundColor: Colors.greenAccent,
+                      child: Icon(
+                        Icons.arrow_circle_down,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              CustomWidget(
-                titleText: "0 kbps",
-                subTitleText: "UPLOAD",
-                roundWidgetWithIcon: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.redAccent,
-                  child: Icon(
-                    Icons.arrow_circle_up_rounded,
-                    size: 30,
-                    color: Colors.white,
+                  CustomWidget(
+                    titleText: "${dataSnapshot.data?.byteOut ?? '0 kbps'}",
+                    subTitleText: "UPLOAD",
+                    roundWidgetWithIcon: CircleAvatar(
+                      radius: 32,
+                      backgroundColor: Colors.redAccent,
+                      child: Icon(
+                        Icons.arrow_circle_up_rounded,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
+                ],
+              );
+            },
+          )
         ],
       ),
       bottomNavigationBar: locationSelectionBottomNavigation(context),

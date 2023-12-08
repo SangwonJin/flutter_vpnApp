@@ -38,6 +38,8 @@ dependencies:
   get: 
   hive:
   hive_flutter:
+  http:
+  csv:
 
 dev_dependencies:
   flutter_test:
