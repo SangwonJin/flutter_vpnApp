@@ -42,7 +42,7 @@ class ApiVpnGate {
     } catch (e) {
       Get.snackbar(
         'Error Occurred',
-        '${e.toString()}',
+        e.toString(),
         colorText: Colors.white,
         backgroundColor: Colors.redAccent.withOpacity(0.8),
       );
@@ -65,7 +65,7 @@ class ApiVpnGate {
     } catch (e) {
       Get.snackbar(
         'Error Occurred',
-        '${e.toString()}',
+        e.toString(),
         colorText: Colors.white,
         backgroundColor: Colors.redAccent.withOpacity(0.8),
       );

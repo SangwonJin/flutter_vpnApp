@@ -15,7 +15,9 @@
         android:name="${applicationName}"
         android:label="Free VPN"
         android:icon="@mipmap/logo"
-        tools:ignore="AllowBackup">
+        tools:ignore="AllowBackup"
+        android:enableOnBackInvokedCallback="true"
+        >
         
         <!-- For Ads -->
         <meta-data

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:openvpn_test_app/allControllers/vpn_location_controller.dart';
+import 'package:openvpn_test_app/allWidgets/vpn_location_card_widget.dart';
 
 class AvailableVpnServerLocation extends StatelessWidget {
   AvailableVpnServerLocation({super.key});
@@ -9,7 +10,7 @@ class AvailableVpnServerLocation extends StatelessWidget {
   final VpnLocationController vpnLocationController = VpnLocationController();
 
   Widget loadingWidget() {
-    return SizedBox(
+    return const SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: Column(
@@ -20,7 +21,7 @@ class AvailableVpnServerLocation extends StatelessWidget {
               Colors.redAccent,
             ),
           ),
-          const SizedBox(
+          SizedBox(
             height: 8,
           ),
           Text(
@@ -51,10 +52,16 @@ class AvailableVpnServerLocation extends StatelessWidget {
 
   Widget vpnAvailableServerWidget() {
     return ListView.builder(
-        itemCount: vpnLocationController.freeAvailableVpnServersList.length,
-        physics: BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(3),
-        itemBuilder: (context, index) {});
+      itemCount: vpnLocationController.freeAvailableVpnServersList.length,
+      physics: BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(3),
+      itemBuilder: (context, index) {
+        return VpnLocationCardWidget(
+          vpnInfoModel:
+              vpnLocationController.freeAvailableVpnServersList[index],
+        );
+      },
+    );
   }
 
   @override
@@ -75,6 +82,22 @@ class AvailableVpnServerLocation extends StatelessWidget {
             : vpnLocationController.freeAvailableVpnServersList.isEmpty
                 ? noVpnServerFoundUiWidget()
                 : vpnAvailableServerWidget(),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(
+            bottom: 10,
+            right: 10,
+          ),
+          child: FloatingActionButton(
+            backgroundColor: Colors.redAccent,
+            onPressed: () {
+              vpnLocationController.retrieveVpnInfomation();
+            },
+            child: Icon(
+              CupertinoIcons.refresh_circled,
+              size: 40,
+            ),
+          ),
+        ),
       ),
     );
   }

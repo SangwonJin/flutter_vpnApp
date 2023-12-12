@@ -1,0 +1,14 @@
+import 'package:get/get.dart';
+
+import '../allControllers/home_controller.dart';
+
+class HomeBinding implements Bindings {
+  @override
+  void dependencies() {
+    Get.put(
+      HomeController(),
+      permanent: true,
+    );
+    // Add more dependencies if needed
+  }
+}

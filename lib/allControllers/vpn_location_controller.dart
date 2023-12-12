@@ -14,5 +14,7 @@ class VpnLocationController extends GetxController {
 
     freeAvailableVpnServersList =
         await ApiVpnGate.retrieveAllAvailableVpnServers();
+
+    isLoadingNewLocations.value = false;
   }
 }

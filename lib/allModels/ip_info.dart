@@ -20,9 +20,9 @@ class IPInfo {
   // Factory constructor to create an instance of IPInfo from a JSON map
   factory IPInfo.fromJson(Map<String, dynamic> json) {
     return IPInfo(
-      countryName: json['countryName'],
+      countryName: json['country'] ?? '',
       regionName: json['regionName'] ?? '',
-      cityName: json['cityName'] ?? '',
+      cityName: json['city'] ?? '',
       zipCode: json['zip'] ?? '',
       timeZone: json['timezone'] ?? 'Unknown',
       internetServiceProvider: json['isp'] ?? 'Unknown',

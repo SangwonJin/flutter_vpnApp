@@ -19,7 +19,9 @@ class HomeController extends GetxController {
           "County / Location", "Please select a country or location first");
       return;
     }
+
     if (vpnConnectionState.value == VpnEngine.vpnDisConnectedNow) {
+      // vpnConnectionState.value = VpnEngine.vpnConnectingNow;
       final Uint8List vpnConfigData = Base64Decoder()
           .convert(vpnInfo.value.base64OpenVPNConfigurationsData);
       final String configuration = Utf8Decoder().convert(vpnConfigData);
@@ -30,8 +32,10 @@ class HomeController extends GetxController {
           countryName: vpnInfo.value.contryLongName,
           config: configuration);
       await VpnEngine.startVpnNow(vpnConfiguration);
+      vpnConnectionState.value = VpnEngine.vpnConnectedNow;
     } else {
       await VpnEngine.stopVpnNow();
+      vpnConnectionState.value = VpnEngine.vpnDisConnectedNow;
     }
   }
 

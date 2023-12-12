@@ -3,23 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:openvpn_test_app/allControllers/home_controller.dart';
 import 'package:openvpn_test_app/allModels/vpn_status.dart';
+import 'package:openvpn_test_app/allScreens/available_servers_location_screen.dart';
+import 'package:openvpn_test_app/allScreens/connected_network_ip_info_screen.dart';
 import 'package:openvpn_test_app/allWidgets/custom_widget.dart';
+import 'package:openvpn_test_app/allWidgets/timer_widget.dart';
 import 'package:openvpn_test_app/appPreferences/appPreferences.dart';
 import 'package:openvpn_test_app/vpnEngine/vpn_engine.dart';
 
 import '../main.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends GetView<HomeController> {
   HomeScreen({super.key});
-
-  final HomeController homeController = Get.put(HomeController());
-
+  // final HomeController homeController = Get.put(HomeController());
   locationSelectionBottomNavigation(BuildContext context) {
     return SafeArea(
         child: Semantics(
       button: true,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Get.to(() => AvailableVpnServerLocation());
+        },
         child: Container(
           color: Colors.redAccent,
           padding: EdgeInsets.symmetric(horizontal: sizeScreen.width * 0.041),
@@ -44,7 +47,7 @@ class HomeScreen extends StatelessWidget {
               CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Icon(Icons.keyboard_arrow_right),
-              )
+              ),
             ],
           ),
         ),
@@ -55,29 +58,32 @@ class HomeScreen extends StatelessWidget {
   Widget vpnRoundButton() {
     return Column(
       children: [
+        //Vpn button
         Semantics(
           button: true,
           child: InkWell(
+            onTap: () {
+              controller.connectToVpnNow();
+            },
             borderRadius: BorderRadius.circular(100),
             child: Container(
               padding: EdgeInsets.all(18),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: homeController.getRoundVpnButtonColor.withOpacity(0.1),
+                color: controller.getRoundVpnButtonColor.withOpacity(0.1),
               ),
               child: Container(
                 padding: EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: homeController.getRoundVpnButtonColor.withOpacity(0.3),
+                  color: controller.getRoundVpnButtonColor.withOpacity(0.3),
                 ),
                 child: Container(
-                  width: sizeScreen.width * 0.14,
+                  width: sizeScreen.height * 0.14,
                   height: sizeScreen.height * 0.14,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color:
-                        homeController.getRoundVpnButtonColor.withOpacity(0.5),
+                    color: controller.getRoundVpnButtonColor.withOpacity(0.5),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -91,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                         height: 6,
                       ),
                       Text(
-                        homeController.getRoundVpnButtonText,
+                        controller.getRoundVpnButtonText,
                         style: TextStyle(
                             fontSize: 14,
                             color: Colors.white,
@@ -102,15 +108,47 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            onTap: () {},
           ),
-        )
+        ),
+
+        const SizedBox(
+          height: 20,
+        ),
+        //status of connection
+        Container(
+          margin: EdgeInsets.only(
+              top: Get.height * 0.01, bottom: Get.height * 0.02),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+          decoration: BoxDecoration(
+              color: Colors.redAccent, borderRadius: BorderRadius.circular(16)),
+          child: Text(
+            controller.vpnConnectionState.value == VpnEngine.vpnDisConnectedNow
+                ? "Not Connected"
+                : controller.vpnConnectionState
+                    .replaceAll("-", " ")
+                    .toUpperCase(),
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.white,
+            ),
+          ),
+        ),
+
+        //timer
+        Obx(
+          () => TimerWidget(
+              initTimerNow: controller.vpnConnectionState.value ==
+                  VpnEngine.vpnConnectedNow),
+        ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    VpnEngine.snapshotVpnStage().listen((status) {
+      controller.vpnConnectionState.value = status;
+    });
     sizeScreen = Get.size;
 
     return Scaffold(
@@ -119,7 +157,9 @@ class HomeScreen extends StatelessWidget {
         title: Text('Free VPN'),
         leading: IconButton(
           icon: Icon(Icons.perm_device_info),
-          onPressed: () {},
+          onPressed: () {
+            Get.to(() => ConnectedNetworkDetail());
+          },
         ),
         actions: [
           IconButton(
@@ -142,31 +182,31 @@ class HomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CustomWidget(
-                  titleText: homeController.vpnInfo.value.contryLongName.isEmpty
+                  titleText: controller.vpnInfo.value.contryLongName.isEmpty
                       ? "Location"
-                      : homeController.vpnInfo.value.contryLongName,
+                      : controller.vpnInfo.value.contryLongName,
                   subTitleText: "FREE",
                   roundWidgetWithIcon: CircleAvatar(
                     radius: 32,
                     backgroundColor: Colors.redAccent,
-                    child: homeController.vpnInfo.value.contryLongName.isEmpty
+                    child: controller.vpnInfo.value.contryLongName.isEmpty
                         ? Icon(
                             Icons.flag_circle,
                             size: 30,
                             color: Colors.white,
                           )
                         : null,
-                    backgroundImage: homeController
+                    backgroundImage: controller
                             .vpnInfo.value.contryLongName.isEmpty
                         ? null
                         : AssetImage(
-                            "countryFlags/${homeController.vpnInfo.value.countryShortName.toLowerCase()}.png"),
+                            "countryFlags/${controller.vpnInfo.value.countryShortName.toLowerCase()}.png"),
                   ),
                 ),
                 CustomWidget(
-                  titleText: homeController.vpnInfo.value.contryLongName.isEmpty
+                  titleText: controller.vpnInfo.value.contryLongName.isEmpty
                       ? "60ms"
-                      : "${homeController.vpnInfo.value.ping} ms",
+                      : "${controller.vpnInfo.value.ping.toString()} ms",
                   subTitleText: "Ping",
                   roundWidgetWithIcon: CircleAvatar(
                     radius: 32,
@@ -183,7 +223,9 @@ class HomeScreen extends StatelessWidget {
           ),
 
           //button for vpn
-          vpnRoundButton(),
+          Obx(
+            () => vpnRoundButton(),
+          ),
 
           //2 round widget
           StreamBuilder<VpnStatus?>(
